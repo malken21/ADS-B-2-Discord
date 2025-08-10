@@ -1,18 +1,21 @@
 use std::time::Duration;
 
+mod util;
+use util::get_env;
+
 mod aircraft;
 use aircraft::aircraft;
 
-let url = env::var("TAR1090_URL").unwrap_or_else(|_| "http://localhost:8080/data/aircraft.json".to_string());
-
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let client = reqwest::Client::new();
+    let url = get_env("TAR1090_URL", "http://localhost:8080/data/aircraft.json");
     let mut interval = tokio::time::interval(Duration::from_secs(3));
+
+    let client = reqwest::Client::new();
     loop {
         interval.tick().await;
 
-        match client.get(url).send().await {
+        match client.get(&url).send().await {
             Ok(res) => {
                 if res.status().is_success() {
                     match res.text().await {
