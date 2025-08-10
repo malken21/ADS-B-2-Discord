@@ -1,28 +1,37 @@
 use std::time::Duration;
 
-mod util;
-use util::get_env;
-
 mod aircraft;
-use aircraft::aircraft;
+
+mod config;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let url = get_env("TAR1090_URL", "http://localhost:8080/data/aircraft.json");
-    let mut interval = tokio::time::interval(
-        Duration::from_secs(get_env("TAR1090_INTERVAL", "5").parse().unwrap())
-    );
+    let config = config::load();
+
+    let url = config["TAR1090_URL"].as_str().expect("TAR1090_URL not found in config");
+    let interval = config["TAR1090_INTERVAL"]
+        .as_i64()
+        .expect("TAR1090_INTERVAL not found in config");
+    // Yaml::Array 型かどうか確認して Vec<String> に変換
+    let flight_vec: Vec<&str> = config["CHECK_FLIGHTS"]
+        .as_vec()
+        .expect("CHECK_FLIGHTS not found in config")
+        .iter()
+        .filter_map(|item| item.as_str()) // .map(String::from) を削除
+        .collect();
 
     let client = reqwest::Client::new();
+    let mut waiter = tokio::time::interval(Duration::from_secs(interval as u64));
+    let watcher = aircraft::Watcher::new(flight_vec);
     loop {
-        interval.tick().await;
+        waiter.tick().await;
 
-        match client.get(&url).send().await {
+        match client.get(url).send().await {
             Ok(res) => {
                 if res.status().is_success() {
                     match res.text().await {
                         Ok(body_text) => {
-                            aircraft(&body_text);
+                            watcher.detection(&body_text);
                         }
                         Err(e) => eprintln!("Failed to read response body: {}", e),
                     }
