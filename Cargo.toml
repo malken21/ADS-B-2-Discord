@@ -1,0 +1,6 @@
+[package]
+name = "ads-b-2-discord"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
