@@ -26,24 +26,35 @@ struct Aircraft {
 }
 // --- 構造体定義 --- end
 
-pub fn aircraft(json_str: &str) {
-    // テキストから新しいstructへのパースを試みる
-    match serde_json::from_str::<AircraftData>(&json_str) {
-        Ok(data) => {
-            // 検出したすべての航空機情報を簡単に出力する
-            for aircraft in data.aircraft {
-                println!(
-                    "機体: {}, 便名: {:?}, 高度: {:?}, 緯度経度: ({:?}, {:?})",
-                    aircraft.hex,
-                    aircraft.flight.map(|s| s.trim().to_string()), // 前後の空白を削除
-                    aircraft.alt_baro,
-                    aircraft.lat,
-                    aircraft.lon
-                );
-            }
+pub struct Watcher {
+    check_flight_list: Vec<String>,
+}
+
+impl Watcher {
+    pub fn new(value: Vec<&str>) -> Self {
+        println!("Check Flight List: {:?}", value);
+        Self {
+            check_flight_list: value.into_iter().map(String::from).collect(),
         }
-        Err(e) => {
-            eprintln!("JSON parsing failed: {}", e);
+    }
+
+    pub fn detection(&self, json_str: &str) {
+        match serde_json::from_str::<AircraftData>(&json_str) {
+            Ok(data) => {
+                for aircraft in data.aircraft {
+                    println!(
+                        "機体: {}, 便名: {:?}, 高度: {:?}, 緯度経度: ({:?}, {:?})",
+                        aircraft.hex,
+                        aircraft.flight.map(|s| s.trim().to_string()), // 前後の空白を削除
+                        aircraft.alt_baro,
+                        aircraft.lat,
+                        aircraft.lon
+                    );
+                }
+            }
+            Err(e) => {
+                eprintln!("JSON parsing failed: {}", e);
+            }
         }
     }
 }
