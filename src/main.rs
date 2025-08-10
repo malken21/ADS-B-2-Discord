@@ -3,7 +3,7 @@ use std::time::Duration;
 
 // --- 構造体定義 --- start
 #[derive(Deserialize, Debug)]
-#[allow(dead_code)] // 使わないフィールドがあっても警告を出さない
+#[allow(dead_code)]
 struct AircraftData {
     now: f64,
     messages: i64,
@@ -11,7 +11,7 @@ struct AircraftData {
 }
 
 #[derive(Deserialize, Debug)]
-#[allow(dead_code)] // 使わないフィールドがあっても警告を出さない
+#[allow(dead_code)]
 struct Aircraft {
     hex: String,
     flight: Option<String>,
