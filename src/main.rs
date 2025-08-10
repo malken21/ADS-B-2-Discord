@@ -9,7 +9,9 @@ use aircraft::aircraft;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let url = get_env("TAR1090_URL", "http://localhost:8080/data/aircraft.json");
-    let mut interval = tokio::time::interval(Duration::from_secs(3));
+    let mut interval = tokio::time::interval(
+        Duration::from_secs(get_env("TAR1090_INTERVAL", "5").parse().unwrap())
+    );
 
     let client = reqwest::Client::new();
     loop {
