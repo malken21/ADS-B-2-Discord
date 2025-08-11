@@ -1,7 +1,6 @@
 use std::time::Duration;
 
 mod aircraft;
-
 mod config;
 
 #[tokio::main]
@@ -31,7 +30,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 if res.status().is_success() {
                     match res.text().await {
                         Ok(body_text) => {
-                            watcher.detection(&body_text);
+                            watcher.detection(&body_text, &config);
                         }
                         Err(e) => eprintln!("Failed to read response body: {}", e),
                     }
