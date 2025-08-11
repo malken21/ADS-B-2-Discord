@@ -36,11 +36,11 @@ pub struct Watcher {
 }
 
 impl Watcher {
-    pub fn new(value: Vec<&str>, discord_webhook_url: &str) -> Self {
+    pub fn new(value: Vec<&str>, discord_webhook_url: &str, cooldown: &f64) -> Self {
         println!("Check Flights: {:?}", value);
         Self {
             check_flights: value.into_iter().map(String::from).collect(),
-            discord: DiscordWebhook::new(discord_webhook_url),
+            discord: DiscordWebhook::new(discord_webhook_url, cooldown),
         }
     }
 
