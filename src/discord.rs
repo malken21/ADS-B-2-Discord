@@ -24,6 +24,10 @@ impl DiscordWebhook {
         lat: &f64,
         lon: &f64
     ) -> Result<(), reqwest::Error> {
+        println!(
+            "{}",
+            format!("機体: {}, 便名: {}, 高度: {}, 緯度経度: ({}, {})", hex, flight, alt, lat, lon)
+        );
         let content = format!("{} {}", hex, flight);
         println!("{}", content);
         // 送信するペイロード 作成
