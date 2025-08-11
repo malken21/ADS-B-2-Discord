@@ -2,6 +2,10 @@ TAR1090_URL: "http://localhost/data/aircraft.json"
 TAR1090_INTERVAL: 3
 DISCORD_WEBHOOK_URL: "DISCORD_WEBHOOK_URL"
 RE_NOTICE_MINUTE: 30.0
+DISCORD_PAYLOAD: |-
+  {
+    "content": "機体: {hex}, 便名: {flight}, 高度: {alt}, 緯度経度: ({lat}, {lon})"
+  }
 CHECK_FLIGHTS:
   - SKY183
   - SKY185
