@@ -52,7 +52,7 @@ impl DiscordWebhook {
             .replace("{lat}", &lat.to_string())
             .replace("{lon}", &lon.to_string());
 
-        println!("{}", payload);
+        println!("機体: {}, 便名: {}, 高度: {}, 緯度経度: ({}, {})", hex, flight, alt, lat, lon);
 
         let client = Client::new();
         let response = client
