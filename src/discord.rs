@@ -2,25 +2,24 @@ use serde::Serialize;
 use std::collections::HashMap;
 use std::sync::Mutex;
 use std::time::{ Duration, Instant };
-
-#[derive(Serialize)]
-struct DiscordWebhookPayload<'a> {
-    content: &'a str,
-}
+use reqwest::header;
+use reqwest::Client;
 
 pub struct DiscordWebhook {
     url: String,
     cooldown: Duration,
+    payload_template: String,
     // 送信タイムスタンプを記録するためのHashMap
     // Mutexでラップして、&self経由でもスレッドセーフに変更できるようにする
     timestamps: Mutex<HashMap<String, Instant>>,
 }
 
 impl DiscordWebhook {
-    pub fn new(url: &str, cooldown: &f64) -> Self {
+    pub fn new(url: &str, cooldown: &f64, payload_template: &str) -> Self {
         Self {
             url: url.to_string(),
             cooldown: Duration::from_secs_f64(*cooldown),
+            payload_template: payload_template.to_string(),
             timestamps: Mutex::new(HashMap::new()),
         }
     }
@@ -46,23 +45,21 @@ impl DiscordWebhook {
             }
         } // ここでロックが自動的に解除
 
-        let content = format!(
-            "機体: {}, 便名: {}, 高度: {}, 緯度経度: ({}, {})",
-            hex,
-            flight,
-            alt,
-            lat,
-            lon
-        );
+        let payload = self.payload_template
+            .replace("{hex}", hex)
+            .replace("{flight}", flight)
+            .replace("{alt}", &alt.to_string())
+            .replace("{lat}", &lat.to_string())
+            .replace("{lon}", &lon.to_string());
 
-        println!("{}", content);
+        println!("{}", payload);
 
-        let payload = DiscordWebhookPayload {
-            content: &content,
-        };
-
-        let client = reqwest::Client::new();
-        let response = client.post(&self.url).json(&payload).send().await?;
+        let client = Client::new();
+        let response = client
+            .post(&self.url)
+            .header(header::CONTENT_TYPE, "application/json")
+            .body(payload)
+            .send().await?;
 
         // ステータスコードがエラーなら詳細を返す
         response.error_for_status()?;
