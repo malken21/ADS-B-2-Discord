@@ -83,9 +83,9 @@ impl Watcher {
                     }
 
                     // 監視対象の便名でない場合はスキップ
-                    //if !self.is_check_flight(&aircraft) {
-                    //    continue;
-                    //}
+                    if !self.is_check_flight(&aircraft) {
+                        continue;
+                    }
 
                     self.discord
                         .send(
