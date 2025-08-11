@@ -1,7 +1,6 @@
 use serde::Deserialize;
-use yaml_rust::Yaml;
 
-use crate::discord::send_discord_webhook;
+use crate::discord::DiscordWebhook;
 
 // --- 構造体定義 --- start
 #[derive(Deserialize, Debug)]
@@ -33,7 +32,7 @@ struct Aircraft {
 
 pub struct Watcher {
     check_flights: Vec<String>,
-    discord_webhook_url: String,
+    discord: DiscordWebhook,
 }
 
 impl Watcher {
@@ -41,7 +40,7 @@ impl Watcher {
         println!("Check Flights: {:?}", value);
         Self {
             check_flights: value.into_iter().map(String::from).collect(),
-            discord_webhook_url: discord_webhook_url.to_string(),
+            discord: DiscordWebhook::new(discord_webhook_url),
         }
     }
 
@@ -92,10 +91,7 @@ impl Watcher {
                         aircraft.lon.unwrap()
                     );
 
-                    send_discord_webhook(
-                        &self.discord_webhook_url,
-                        &message_content
-                    ).await.unwrap_or_else(|e| {
+                    self.discord.send_discord_webhook(&message_content).await.unwrap_or_else(|e| {
                         eprintln!("Failed to send Discord webhook: {}", e);
                     });
 
