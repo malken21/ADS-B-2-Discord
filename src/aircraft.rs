@@ -73,13 +73,7 @@ impl Watcher {
                     {
                         continue;
                     }
-
-                    // 監視対象の便名でない場合はスキップ
-                    if !self.is_check_flight(&aircraft) {
-                        continue;
-                    }
-
-                    println!(
+                    let message_content = format!(
                         "機体: {}, 便名: {:?}, 高度: {:?}, 緯度経度: ({:?}, {:?})",
                         aircraft.hex,
                         aircraft.flight,
@@ -87,6 +81,12 @@ impl Watcher {
                         aircraft.lat,
                         aircraft.lon
                     );
+                    println!("{}", message_content);
+
+                    // 監視対象の便名でない場合はスキップ
+                    if !self.is_check_flight(&aircraft) {
+                        continue;
+                    }
                 }
             }
             Err(e) => {
