@@ -4,5 +4,5 @@ COPY . /app
 RUN cargo build --release
 
 FROM gcr.io/distroless/cc-debian12
-COPY --from=build-env /app/target/release/hads-b-2-discord /
+COPY --from=build-env /app/target/release/ads-b-2-discord /
 CMD ["./ads-b-2-discord"]
