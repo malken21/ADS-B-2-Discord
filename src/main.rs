@@ -15,6 +15,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let webhook = config["DISCORD_WEBHOOK_URL"]
         .as_str()
         .expect("DISCORD_WEBHOOK_URL not found in config");
+    let cooldown =
+        config["RE_NOTICE_MINUTE"].as_f64().expect("RE_NOTICE_MINUTE not found in config") * 60.0; // 秒単位 変換
     // Yaml::Array 型かどうか確認して Vec<String> に変換
     let flight_vec: Vec<&str> = config["CHECK_FLIGHTS"]
         .as_vec()
@@ -25,7 +27,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let client = reqwest::Client::new();
     let mut waiter = tokio::time::interval(Duration::from_secs(interval as u64));
-    let watcher = aircraft::Watcher::new(flight_vec, webhook);
+    let watcher = aircraft::Watcher::new(flight_vec, webhook, &cooldown);
     loop {
         waiter.tick().await;
 
