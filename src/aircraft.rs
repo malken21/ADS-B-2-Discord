@@ -47,9 +47,8 @@ impl Watcher {
         }
     }
 
-    fn is_check_flight(&self, flight_opt: &Option<String>) -> bool {
-        println!("Checking flight: {:?}", flight_opt);
-        flight_opt
+    fn is_check_flight(&self, aircraft: &Aircraft) -> bool {
+        aircraft.flight
             .as_ref() // &Option<String> から Option<&String> に変換
             .map_or(
                 false, // OptionがNoneの場合 false
@@ -64,7 +63,15 @@ impl Watcher {
                     // 便名の前後の空白を削除
                     aircraft = self.trim_flight(&aircraft);
 
-                    println!("{}", self.is_check_flight(&aircraft.flight));
+                    // 便名 高度 緯度 経度 いずれかがない場合はスキップ
+                    if
+                        !aircraft.flight.is_some() ||
+                        !aircraft.alt_baro.is_some() ||
+                        !aircraft.lat.is_some() ||
+                        !aircraft.lon.is_some()
+                    {
+                        continue;
+                    }
 
                     println!(
                         "機体: {}, 便名: {:?}, 高度: {:?}, 緯度経度: ({:?}, {:?})",
@@ -74,6 +81,11 @@ impl Watcher {
                         aircraft.lat,
                         aircraft.lon
                     );
+
+                    // 監視対象の便名でない場合はスキップ
+                    if !self.is_check_flight(&aircraft) {
+                        continue;
+                    }
                 }
             }
             Err(e) => {
