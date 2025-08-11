@@ -16,10 +16,19 @@ impl DiscordWebhook {
         }
     }
 
-    pub async fn send_discord_webhook(&self, content: &str) -> Result<(), reqwest::Error> {
+    pub async fn send(
+        &self,
+        hex: &str,
+        flight: &str,
+        alt: &f64,
+        lat: &f64,
+        lon: &f64
+    ) -> Result<(), reqwest::Error> {
+        let content = format!("{} {}", hex, flight);
+        println!("{}", content);
         // 送信するペイロード 作成
         let payload = DiscordWebhookPayload {
-            content,
+            content: &content,
         };
         // HTTPクライアントを作成してリクエスト 送信
         let client = reqwest::Client::new();
