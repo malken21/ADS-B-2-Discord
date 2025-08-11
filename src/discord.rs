@@ -16,7 +16,6 @@ impl DiscordWebhook {
         }
     }
 
-    // この関数は Webhook URL とメッセージ内容を引数に取る
     pub async fn send_discord_webhook(&self, content: &str) -> Result<(), reqwest::Error> {
         // 送信するペイロードを作成
         let payload = DiscordWebhookPayload {
