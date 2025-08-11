@@ -19,7 +19,7 @@ struct Aircraft {
     hex: String,
     flight: Option<String>,
     squawk: Option<String>,
-    alt_baro: Option<serde_json::Value>,
+    alt_baro: Option<f64>,
     lat: Option<f64>,
     lon: Option<f64>,
     gs: Option<f64>,
@@ -82,20 +82,17 @@ impl Watcher {
                     //    continue;
                     //}
 
-                    let message_content = format!(
-                        "機体: {}, 便名: {}, 高度: {}, 緯度経度: ({}, {})",
-                        aircraft.hex,
-                        aircraft.flight.unwrap(),
-                        aircraft.alt_baro.unwrap(),
-                        aircraft.lat.unwrap(),
-                        aircraft.lon.unwrap()
-                    );
-
-                    self.discord.send_discord_webhook(&message_content).await.unwrap_or_else(|e| {
-                        eprintln!("Failed to send Discord webhook: {}", e);
-                    });
-
-                    println!("{}", message_content);
+                    self.discord
+                        .send(
+                            &aircraft.hex,
+                            &aircraft.flight.unwrap(),
+                            &aircraft.alt_baro.unwrap(),
+                            &aircraft.lat.unwrap(),
+                            &aircraft.lon.unwrap()
+                        ).await
+                        .unwrap_or_else(|e| {
+                            eprintln!("Failed to send Discord webhook: {}", e);
+                        });
                 }
             }
             Err(e) => {
