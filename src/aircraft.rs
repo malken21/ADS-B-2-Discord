@@ -1,4 +1,5 @@
 use serde::Deserialize;
+use yaml_rust::Yaml;
 
 // --- 構造体定義 --- start
 #[derive(Deserialize, Debug)]
@@ -56,7 +57,7 @@ impl Watcher {
             )
     }
 
-    pub fn detection(&self, json_str: &str) {
+    pub fn detection(&self, json_str: &str, config: &Yaml) {
         match serde_json::from_str::<AircraftData>(&json_str) {
             Ok(data) => {
                 for mut aircraft in data.aircraft {
