@@ -1,6 +1,8 @@
 use serde::Deserialize;
 use yaml_rust::Yaml;
 
+use crate::discord::send_discord_webhook;
+
 // --- 構造体定義 --- start
 #[derive(Deserialize, Debug)]
 #[allow(dead_code)]
@@ -31,13 +33,15 @@ struct Aircraft {
 
 pub struct Watcher {
     check_flights: Vec<String>,
+    discord_webhook_url: String,
 }
 
 impl Watcher {
-    pub fn new(value: Vec<&str>) -> Self {
+    pub fn new(value: Vec<&str>, discord_webhook_url: &str) -> Self {
         println!("Check Flights: {:?}", value);
         Self {
             check_flights: value.into_iter().map(String::from).collect(),
+            discord_webhook_url: discord_webhook_url.to_string(),
         }
     }
 
@@ -57,7 +61,7 @@ impl Watcher {
             )
     }
 
-    pub fn detection(&self, json_str: &str, config: &Yaml) {
+    pub async fn detection(&self, json_str: &str) {
         match serde_json::from_str::<AircraftData>(&json_str) {
             Ok(data) => {
                 for mut aircraft in data.aircraft {
@@ -73,20 +77,29 @@ impl Watcher {
                     {
                         continue;
                     }
-                    let message_content = format!(
-                        "機体: {}, 便名: {:?}, 高度: {:?}, 緯度経度: ({:?}, {:?})",
-                        aircraft.hex,
-                        aircraft.flight,
-                        aircraft.alt_baro,
-                        aircraft.lat,
-                        aircraft.lon
-                    );
-                    println!("{}", message_content);
 
                     // 監視対象の便名でない場合はスキップ
-                    if !self.is_check_flight(&aircraft) {
-                        continue;
-                    }
+                    //if !self.is_check_flight(&aircraft) {
+                    //    continue;
+                    //}
+
+                    let message_content = format!(
+                        "機体: {}, 便名: {}, 高度: {}, 緯度経度: ({}, {})",
+                        aircraft.hex,
+                        aircraft.flight.unwrap(),
+                        aircraft.alt_baro.unwrap(),
+                        aircraft.lat.unwrap(),
+                        aircraft.lon.unwrap()
+                    );
+
+                    send_discord_webhook(
+                        &self.discord_webhook_url,
+                        &message_content
+                    ).await.unwrap_or_else(|e| {
+                        eprintln!("Failed to send Discord webhook: {}", e);
+                    });
+
+                    println!("{}", message_content);
                 }
             }
             Err(e) => {
