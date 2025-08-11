@@ -1,4 +1,3 @@
-use serde::Serialize;
 use std::collections::HashMap;
 use std::sync::Mutex;
 use std::time::{ Duration, Instant };
@@ -35,7 +34,7 @@ impl DiscordWebhook {
         // クールダウンチェック
         {
             // Mutexのロックガードのスコープを限定
-            let mut timestamps = self.timestamps.lock().unwrap(); // Mutexをロック
+            let timestamps = self.timestamps.lock().unwrap(); // Mutexをロック
             if let Some(last_sent) = timestamps.get(hex) {
                 // 前回送信からの経過時間がクールダウン時間より短い場合
                 if last_sent.elapsed() < self.cooldown {
